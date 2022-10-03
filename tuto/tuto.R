@@ -20,20 +20,16 @@ frequency_in_sliding_window <- function(sequence, ntd, size, shift) {
     start = 1
     end = size
     for(i in 1:length(vec)) {
-        if(i==length(vec)) {
-            vec[i] = count(sequence[start:length(sequence)], ntd) / length(sequence[start:end])
-        }
-        else {
-            vec[i] = count(sequence[start:end], ntd) / length(sequence[start:end])
-        }
+        vec[i] = count(sequence[start:end], ntd) / length(sequence[start:end])
         start = start + shift
-        end = end + shift
+        end = if (i==(length(vec) - 1)) length(sequence) else end + shift
     
     }
     vec
 }
 
-v = c("C", "A", "T", "A", "C", "C", "T", "T", "C", "C", "A", "A", "A")
-x = frequency_in_sliding_window(v, "T", 6, 6)
+v = c("G", "T", "G", "A", "G", "C", "C", "G", "A", "G", "T", "G", "A", "C", "T", "C", "C", "A", "A", "T", "T", 
+"T", "G", "G", "A", "A", "A", "T", "A", "C", "T", "C", "C", "T", "C", "C", "G", "A")
+x = frequency_in_sliding_window(v, "A", 18, 17)
 x
 
