@@ -64,6 +64,39 @@ dimer_freq = function(file){
 
 }
 
-ex_1.3.2()
-dimer_freq("./Projet1/bovine.fasta")
+
+
+odss_ratio = function(file){
+    mat = read.dna(file, format="fasta", as.character = TRUE) 
+    seq = as.vector(mat)
+    seqLength = length(seq)
+
+    getNucleotideProb = function(nc){
+        length(which(seq==nc)) / seqLength
+    }
+
+    m_odds = matrix(0, nrow = 4, ncol = 4)
+    colnames(m_odds) = c("a","c","g","t")
+    rownames(m_odds) = c("a","c","g","t")
+    nucProb = c("a"=0, "c"=0, "g"=0, "t"=0)
+
+    for(i in names(nucProb)){
+        nucProb[i] = getNucleotideProb(i)
+    }
+
+    m = dimer_freq(file)
+
+    for(i in names(nucProb)){
+        for(j in names(nucProb)){
+            m_odds[i, j] = nucProb[i] * nucProb[j]
+        }
+    }
+
+     m = m / m_odds
+     saveRDS(m, file="./Projet1/odd_ratios.rds")
+     m
+
+}
+
+
 
