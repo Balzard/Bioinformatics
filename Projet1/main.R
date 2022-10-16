@@ -2,6 +2,12 @@ source("./tuto/tuto.R")
 library(ape)
 library(ggplot2)
 
+openFile = function(file){
+    mat = read.dna(file, format="fasta", as.character = TRUE) 
+    seq = as.vector(mat)
+    seq
+}
+
 gc_content <- function(sequence, size, shift, nc1, nc2){
     solution = vector(length=nb_sliding_windows(length(sequence), size, shift))
     start = 1
@@ -18,8 +24,7 @@ gc_content <- function(sequence, size, shift, nc1, nc2){
 
 
 plot_freq = function(file){
-    mat = read.dna(file, format="fasta", as.character = TRUE) #./Projet1/ebola.fasta
-    ebola_vector = as.vector(mat)
+    ebola_vector = openFile(file)
     gc_freq = gc_content(ebola_vector, 500, 250, "g", "c")
     at_freq = gc_content(ebola_vector, 500, 250, "a", "t")
     plot(at_freq, type="l", col="green", ylim=c(0.3,0.8), ylab="Freq")
@@ -45,8 +50,7 @@ dimer_freq = function(file){
     m = matrix(0, nrow = 4, ncol = 4)
     colnames(m) = c("*A", "*C", "*G", "*T")
     rownames(m) = c("A*", "C*", "G*", "T*")
-    seq = read.dna(file, format="fasta", as.character = TRUE)
-    seq = as.vector(seq)
+    seq = openFile(file)
 
     dic = c("a"=1, "c"=2, "g"=3, "t"=4)
 
@@ -65,10 +69,8 @@ dimer_freq = function(file){
 }
 
 
-
 odss_ratio = function(file){
-    mat = read.dna(file, format="fasta", as.character = TRUE) 
-    seq = as.vector(mat)
+    seq = aopenFile(file)
     seqLength = length(seq)
 
     getNucleotideProb = function(nc){
@@ -98,5 +100,61 @@ odss_ratio = function(file){
 
 }
 
+openReadingFrames = function(file, k=c("0"=0, "10"=0, "50"=0, "100"=0, "300"=0, "500"=0),
+                            startCodons = c("ttg", "ctg", "ata", "att", "atc", "atg", "gtg"),
+                            stopCodons =c("tga", "taa", "tag")){
+    seq = openFile(file)
+    lengthSeq = length(seq)
+    rest1 = lengthSeq %% 3
+    rest2 = (lengthSeq - 1) %% 3
+    rest3 = (lengthSeq - 2) %% 3
 
+    rf1 = seq[1:(lengthSeq-rest1)]
+    rf2 = seq[2:(lengthSeq-1-rest2)]
+    rf3 = seq[3:(lengthSeq-2-rest3)]
 
+    reverse = c("a"="t", "t"="a", "g"="c", "c"="g")
+    orf_starts = c(0,0,0,0,0,0)
+    status = c(FALSE, FALSE, FALSE, FALSE, FALSE, FALSE)
+
+    for(i in 1:lengthSeq){
+        if(i <= length(rf1) - 2){
+            codon1 = paste(rf1[i:(i+2)], collapse = "")
+            codon4 = paste(c(reverse[rf1[i]], reverse[rf1[i+1]], reverse[rf1[i+2]]), collapse = "") # nolint
+        }
+        if(i <= length(rf2) - 2){
+            codon2 = paste(rf2[i:i+2], collapse = "")
+            codon5 = paste(c(reverse[rf2[i]], reverse[rf2[i+1]], reverse[rf3[i+2]]), collapse = "") # nolint
+        }
+        if(i <= length(rf3) - 2){
+            codon3 = paste(rf3[i:i+2], collapse = "")
+            codon6 = paste(c(reverse[rf3[i]], reverse[rf3[i+1]], reverse[rf3[i+2]]), collapse = "") # nolint
+        }
+
+        codons = c(codon1, codon2, codon3, codon4, codon5, codon6)
+        #print(codon4)
+
+        for(c in 1:length(codons)){
+
+            if(codons[c] %in% startCodons && status[c] == FALSE){
+                status[c] = TRUE
+                orf_starts[c] = i
+            }
+            if(codons[c] %in% stopCodons && status[c] == TRUE){
+                status[c] = FALSE
+                tmp = i - orf_starts[c]
+
+                for(j in names(k)){
+                    if(strtoi(j) <= tmp){
+                        k[j] = k[j] + 1
+                    }
+                }
+            }
+        }
+    }
+
+    saveRDS(k,"./Projet1/data/orf.rds")
+    k
+}
+
+openReadingFrames("./Projet1/data/bacterial_sequence.fasta")
