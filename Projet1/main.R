@@ -121,6 +121,7 @@ openReadingFrames = function(file, k=c("0"=0, "10"=0, "50"=0, "100"=0, "300"=0, 
     orf_starts = c(0,0,0,0,0,0)
     status = c(FALSE, FALSE, FALSE, FALSE, FALSE, FALSE)
 
+    # loop over each codon of each reading frame
     for(i in seq(1,lengthSeq,3)){
         if(i <= length(rf1)){
             codon1 = paste(rf1[i:(i+2)], collapse = "")
@@ -138,14 +139,18 @@ openReadingFrames = function(file, k=c("0"=0, "10"=0, "50"=0, "100"=0, "300"=0, 
 
         for(c in 1:length(codons)){
 
+            # if start codon found in a reading frame
             if(codons[c] %in% startCodons && status[c] == FALSE){
                 status[c] = TRUE
                 orf_starts[c] = i
             }
+
+            # if stop codon found in a reading frame
             if(codons[c] %in% stopCodons && status[c] == TRUE && orf_starts[c] != i-1){
                 status[c] = FALSE
                 tmp = i - orf_starts[c]
 
+                # increment nb of ORF for each size in k if length(ORF) >= k
                 for(j in names(k)){
                     if(strtoi(j) <= tmp){
                         k[j] = k[j] + 1
@@ -159,7 +164,5 @@ openReadingFrames = function(file, k=c("0"=0, "10"=0, "50"=0, "100"=0, "300"=0, 
     print(k)
 }
 
-
-#ORF()
 
 openReadingFrames("./Projet1/data/bacterial_sequence.fasta")
