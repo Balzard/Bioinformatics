@@ -109,30 +109,32 @@ openReadingFrames = function(file, k=c("0"=0, "10"=0, "50"=0, "100"=0, "300"=0, 
     rest2 = (lengthSeq - 1) %% 3
     rest3 = (lengthSeq - 2) %% 3
 
-    rf1 = seq[1:(lengthSeq-rest1)]
-    rf2 = seq[2:(lengthSeq-1-rest2)]
-    rf3 = seq[3:(lengthSeq-2-rest3)]
-
     reverse = c("a"="t", "t"="a", "g"="c", "c"="g")
+    # readings frames
+    rf1 = seq[1:(lengthSeq-rest1)]
+    rf2 = seq[2:(lengthSeq-rest2)]
+    rf3 = seq[3:(lengthSeq-rest3)]
+    rf4 = replace(rev(seq), TRUE, reverse[rev(seq)])[1:(lengthSeq-rest1)]
+    rf5 = replace(rev(seq), TRUE, reverse[rev(seq)])[2:(lengthSeq-rest2)]
+    rf6 = replace(rev(seq), TRUE, reverse[rev(seq)])[3:(lengthSeq-rest3)]
+
     orf_starts = c(0,0,0,0,0,0)
     status = c(FALSE, FALSE, FALSE, FALSE, FALSE, FALSE)
 
-    for(i in 1:lengthSeq){
-        if(i <= length(rf1) - 2){
+    for(i in seq(1,lengthSeq,3)){
+        if(i <= length(rf1)){
             codon1 = paste(rf1[i:(i+2)], collapse = "")
-            codon4 = paste(c(reverse[rf1[i]], reverse[rf1[i+1]], reverse[rf1[i+2]]), collapse = "") # nolint
+            codon4 = paste(rf4[i:(i+2)], collapse = "")
         }
-        if(i <= length(rf2) - 2){
-            codon2 = paste(rf2[i:i+2], collapse = "")
-            codon5 = paste(c(reverse[rf2[i]], reverse[rf2[i+1]], reverse[rf3[i+2]]), collapse = "") # nolint
+        if(i <= length(rf2)){
+            codon2 = paste(rf2[i:(i+2)], collapse = "")
+            codon5 = paste(rf5[i:(i+2)], collapse = "") 
         }
-        if(i <= length(rf3) - 2){
-            codon3 = paste(rf3[i:i+2], collapse = "")
-            codon6 = paste(c(reverse[rf3[i]], reverse[rf3[i+1]], reverse[rf3[i+2]]), collapse = "") # nolint
-        }
+        if(i <= length(rf3)){
+            codon3 = paste(rf3[i:(i+2)], collapse = "")
+            codon6 = paste(rf6[i:(i+2)], collapse = "") 
 
         codons = c(codon1, codon2, codon3, codon4, codon5, codon6)
-        #print(codon4)
 
         for(c in 1:length(codons)){
 
@@ -140,7 +142,7 @@ openReadingFrames = function(file, k=c("0"=0, "10"=0, "50"=0, "100"=0, "300"=0, 
                 status[c] = TRUE
                 orf_starts[c] = i
             }
-            if(codons[c] %in% stopCodons && status[c] == TRUE){
+            if(codons[c] %in% stopCodons && status[c] == TRUE && orf_starts[c] != i-1){
                 status[c] = FALSE
                 tmp = i - orf_starts[c]
 
@@ -152,9 +154,12 @@ openReadingFrames = function(file, k=c("0"=0, "10"=0, "50"=0, "100"=0, "300"=0, 
             }
         }
     }
-
+    }
     saveRDS(k,"./Projet1/data/orf.rds")
-    k
+    print(k)
 }
+
+
+#ORF()
 
 openReadingFrames("./Projet1/data/bacterial_sequence.fasta")
