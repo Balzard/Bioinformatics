@@ -129,11 +129,11 @@ openReadingFrames = function(file, k=c("0"=0, "10"=0, "50"=0, "100"=0, "300"=0, 
         }
         if(i <= length(rf2)){
             codon2 = paste(rf2[i:(i+2)], collapse = "")
-            codon5 = paste(rf5[i:(i+2)], collapse = "") 
+            codon5 = paste(rf5[i:(i+2)], collapse = "")
         }
         if(i <= length(rf3)){
             codon3 = paste(rf3[i:(i+2)], collapse = "")
-            codon6 = paste(rf6[i:(i+2)], collapse = "") 
+            codon6 = paste(rf6[i:(i+2)], collapse = "")
 
         codons = c(codon1, codon2, codon3, codon4, codon5, codon6)
 
