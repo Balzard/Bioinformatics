@@ -7,4 +7,4 @@ dlAndSaveData = function(){
 }
 
 sequences = read.dna(file = "./Projet2/data.fasta", format = "fasta")
-print(str(sequences))
+print(length(sequences[1,]))
