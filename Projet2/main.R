@@ -1,21 +1,10 @@
 library(ape)
 
 dlAndSaveData = function(){
-    accessionsNumbers = readLines("./Projet2/AccessionNumbers.txt")
-    for(i in accessionsNumbers){
-        print(i)
-        mat = read.GenBank(i,as.character = TRUE)
-        seq = mat[[1]]
-        # write.dna(mat, file = paste(c("./Projet2/data/", i, ".gb"), collapse = ""))
-        print(length(seq))
-    }
+    accessionsNumbers = c(readLines("./Projet2/AccessionNumbers.txt"))
+    mat = read.GenBank(accessionsNumbers)
+    write.dna(mat, file = "./Projet2/data.fasta", format = "fasta", append = FALSE, nbcol = 6, colsep = " ", colw = 10)
 }
 
-dlAndSaveData()
-
-# for(i in filenames){
-#     print(i)
-#     mat = read.dna(paste(c("./Projet2/data/", i), collapse = ""), as.character = TRUE)
-#     seq = mat[[1]]
-#     print(length(mat))
-# }
+sequences = read.dna(file = "./Projet2/data.fasta", format = "fasta")
+print(str(sequences))
