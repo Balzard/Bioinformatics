@@ -105,3 +105,32 @@ getMostDiffFeatures = function(data, target, limit=50){
 
 most_diff_features = getMostDiffFeatures(subset_train, "labels")
 saveRDS(most_diff_features, "./Projet3/most_diff_features.rds")
+
+
+library("gplots")
+
+getHeatmap = function(subset_train, most_diff_features){
+    train_most_diff_features = subset(subset_train, select = names(most_diff_features))
+    matrix_heatmap = data.matrix(train_most_diff_features)
+    labels_color = c("No tumor"="blue", "Glioblastoma"="purple")
+    PID_colors = vector()
+
+    for(i in train[, "labels"]){
+        PID_colors = append(PID_colors, labels_color[i])
+    }
+
+    print(length(matrix_heatmap[,1:50]))
+
+    png(file = "./Projet3/heatmap.png", width = 800, height = 1000)
+    heatmap.2(x=matrix_heatmap, trace = "none", main = "Heatmap of features and samples", xlab = "Genes", ylab = "Patients ID", RowSideColors = PID_colors)
+    legend(x="topright",legend = c("No tumor", "Glioblastoma"), fill = c("blue", "purple"))
+    dev.off()
+
+}
+
+most_diff_features = readRDS("./Projet3/most_diff_features.rds")
+most_diff_features
+
+getHeatmap(subset_train, most_diff_features)
+
+most_diff_features
