@@ -133,4 +133,15 @@ most_diff_features
 
 getHeatmap(subset_train, most_diff_features)
 
-most_diff_features
+plotMostDiffFeatures = function(most_diff_features, subset_train){
+    most_diff_features = most_diff_features[1:2]
+    train_most_diff_features = subset(subset_train, select = names(most_diff_features))
+    labels_color = c("No tumor"="red", "Glioblastoma"="blue")
+    PID_colors = vector()
+    for(i in train[, "labels"]){
+        PID_colors = append(PID_colors, labels_color[i])
+    }
+    plot(train_most_diff_features[,1], train_most_diff_features[,2], col = PID_colors, xlab = names(train_most_diff_features[1]), ylab=names(train_most_diff_features[2]), pch = 19)
+}
+
+plotMostDiffFeatures(most_diff_features, subset_train)
