@@ -145,3 +145,17 @@ plotMostDiffFeatures = function(most_diff_features, subset_train){
 }
 
 plotMostDiffFeatures(most_diff_features, subset_train)
+
+
+library("LiblineaR")
+
+svm = function(data){
+    standardizedData = as.data.frame(scale(data[,1:2500]))
+    model = LiblineaR(type = 2, data = standardizedData, target = data[,2501])
+    parameters = sort(model$W[1,], decreasing = TRUE)
+    top_parameters = parameters[2:11] # start at 2 bc bias has te highest weight
+    top_parameters
+}
+
+p = svm(subset_train)
+p
