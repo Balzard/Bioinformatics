@@ -39,7 +39,7 @@ differential_selection = function(data, target, alpha){
 
 subset_train = subset_df(train)
 i = differential_selection(subset_train, "labels", 0.05)
-
+i
 
 correct = function(data, target, alpha, method){
     features = names(data)[1:(length(names(data)) - 1)]
@@ -149,13 +149,62 @@ plotMostDiffFeatures(most_diff_features, subset_train)
 
 library("LiblineaR")
 
+get_p_values = function(data, target, alpha){
+    features = names(data)[1:(length(names(data)) - 1)]
+    rank = c()
+    rank_names = c()
+    for(feature in features){
+        feature1 = subset(data[data[, target] == "No tumor",], select = feature)
+        feature2 = subset(data[data[, target] == "Glioblastoma",], select = feature)
+        test = t.test(feature1, feature2)
+        p_value = test$p.value
+        rank = append(rank, p_value)
+        rank_names = append(rank_names, feature)
+    }
+    names(rank) = rank_names
+    rank = sort(rank)
+    rank
+}
+
 svm = function(data){
     standardizedData = as.data.frame(scale(data[,1:2500]))
     model = LiblineaR(type = 2, data = standardizedData, target = data[,2501])
     parameters = sort(model$W[1,], decreasing = TRUE)
     top_parameters = parameters[2:11] # start at 2 bc bias has te highest weight
-    top_parameters
+    Weight = top_parameters
+    Rank = c()
+    p_values = get_p_values(data, "labels", 0.05)
+    for(parameter in names(top_parameters)){
+        Rank = append(Rank, which(p_values == p_values[parameter]))
+    }
+    df = data.frame(Weight, Rank)
+    row.names(df) = names(top_parameters)
+    df
 }
 
-p = svm(subset_train)
-p
+df = svm(subset_train)
+df
+saveRDS(df, "./Projet3/SVM_weights.rds")
+
+test = read.csv("./Projet3/test.csv.bz2", header = TRUE)
+test = data.frame(test[,-1], row.names = test[,1]) # to get patients IDs as row name
+
+confusion_matrix = function(subset_df_train, df_test){
+    df_test = subset(df_test, select = names(subset_df_train))
+    labels = df_test[,2501]
+    standardizedTrain = scale(subset_df_train[,1:2500])
+    df_test = scale(df_test[,1:2500], attr(standardizedTrain, "scaled:center"), attr(standardizedTrain, "scaled:scale"))
+    model = LiblineaR(type = 2, data = standardizedTrain, target = subset_df_train[,2501])
+    p = predict(model, df_test)
+    return(table(p$predictions, labels))
+}
+
+tab = confusion_matrix(subset_train, test)
+saveRDS(tab, "./Projet3/confusion_matrix.rds")
+
+classification_accuracy = function(confusion_matrix){
+    true = confusion_matrix[1,1] + confusion_matrix[2,2]
+    return(true/sum(confusion_matrix))
+}
+
+classification_accuracy(tab)
