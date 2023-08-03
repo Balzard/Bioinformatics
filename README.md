@@ -1,3 +1,3 @@
 # LGBIO2010 projects
 
-Implementations of the project of the Bioinformatics course of Uclouvain
+Implementations of the projects of the Bioinformatics course of Uclouvain
